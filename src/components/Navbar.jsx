@@ -1,6 +1,11 @@
+"use client";
+
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import React from "react";
 
 export default function Navbar() {
+  const { data: session, status } = useSession();
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -71,7 +76,18 @@ export default function Navbar() {
         </ul>
       </div>
       <div className="navbar-end">
-        <a className="btn">Button</a>
+        {status === "authenticated" ? (
+          // Content to show when authenticated
+          <button onClick={() => signOut()}>Logout</button>
+        ) : (
+          <Link
+            href="/login
+          
+          "
+          >
+            Login
+          </Link>
+        )}
       </div>
     </div>
   );
