@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "jodit-react": "^5.2.19",
     "mongodb": "^6.17.0",
     "next": "15.3.3",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "swiper": "^11.2.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
