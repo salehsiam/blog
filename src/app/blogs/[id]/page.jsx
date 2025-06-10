@@ -1,5 +1,3 @@
-import dbConnect, { collectionNameObj } from "@/lib/dbConnect";
-import { ObjectId } from "mongodb";
 import Image from "next/image";
 import React from "react";
 import { FaCommentDots } from "react-icons/fa";
@@ -7,8 +5,8 @@ import { IoPersonSharp } from "react-icons/io5";
 
 export default async function BlogDetailsPage({ params }) {
   const p = await params;
-  const blogCollection = dbConnect(collectionNameObj.blogCollection);
-  const data = await blogCollection.findOne({ _id: new ObjectId(p.id) });
+  const res = await fetch(`http://localhost:3000/api/blog/${p.id}`);
+  const data = await res.json();
   return (
     <div className="grid grid-cols-12 gap-4">
       <div className="col-span-8 p-4">
