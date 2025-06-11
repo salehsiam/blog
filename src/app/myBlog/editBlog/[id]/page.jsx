@@ -30,7 +30,7 @@ export default function EditBlog() {
 
       setTitle(blog.title);
       setContent(blog.content);
-      setThumbnailUrl(blog.image); // assuming image URL is stored
+      setThumbnailUrl(blog.image);
       setCategory(blog.category || "");
       setTags(blog.tags?.join(", ") || "");
     };

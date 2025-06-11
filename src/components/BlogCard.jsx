@@ -16,7 +16,7 @@ export default function BlogCard({ item }) {
             src={item.image}
             alt={item.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
         <div className="p-4 space-y-2">

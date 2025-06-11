@@ -35,7 +35,7 @@ const BlogSlider = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto py-6 relative">
+    <div className="max-w-7xl mx-auto relative">
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         modules={[Navigation, Pagination, Autoplay]}
