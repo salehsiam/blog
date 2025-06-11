@@ -5,9 +5,7 @@ import { IoPersonSharp } from "react-icons/io5";
 
 export default async function BlogDetailsPage({ params }) {
   const p = await params;
-  const res = await fetch(`http://localhost:3000/api/blog/${p.id}`, {
-    cache: "no-store", // 👈 for fresh fetch (optional)
-  });
+  const res = await fetch(`http://localhost:3000/api/blog/${p.id}`);
   const data = await res.json();
 
   return (
@@ -19,7 +17,7 @@ export default async function BlogDetailsPage({ params }) {
           width={800}
           height={500}
           alt={data.title}
-          className="rounded-xl w-full object-cover"
+          className="rounded-xl w-full h-60 md:h-80 lg:h-96 object-cover"
         />
 
         <h1 className="text-3xl font-bold">{data.title}</h1>
