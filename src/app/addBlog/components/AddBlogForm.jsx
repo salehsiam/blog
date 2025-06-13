@@ -34,6 +34,12 @@ export default function AddBlogForm() {
         return;
       }
 
+      if (!thumbnail) {
+        alert("Please select a thumbnail image.");
+        setPost(false);
+        return;
+      }
+
       // Upload image
       let thumbnailUrl = "";
       if (thumbnail) {
