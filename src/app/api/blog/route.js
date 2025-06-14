@@ -14,12 +14,14 @@ export const GET = async (req) => {
   const { searchParams } = new URL(req.url);
   const category = searchParams.get("category");
   const email = searchParams.get("email");
+  const title = searchParams.get("title");
 
   const blogCollection = await dbConnect(collectionNameObj.blogCollection);
 
   const query = {};
   if (category) query.category = category;
   if (email) query.email = email;
+  if (title) query.title = { $regex: title, $options: "i" };
 
   const blogs = await blogCollection.find(query).toArray();
   revalidatePath("/blogs");

@@ -34,12 +34,6 @@ export default function AddBlogForm() {
         return;
       }
 
-      if (!thumbnail) {
-        alert("Please select a thumbnail image.");
-        setPost(false);
-        return;
-      }
-
       // Upload image
       let thumbnailUrl = "";
       if (thumbnail) {
@@ -69,7 +63,7 @@ export default function AddBlogForm() {
             "Image upload failed. Please check your API key and try again."
           );
           setPost(false);
-          return; // stop form submission
+          return;
         }
       }
       // Construct blog data

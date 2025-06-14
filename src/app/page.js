@@ -1,4 +1,3 @@
-import Image from "next/image";
 import RecentBlogs from "./components/RecentBlogs";
 import BlogSlider from "./components/BlogSlider";
 import LifestyleSection from "./components/LifestyleSection";
