@@ -1,16 +1,20 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useRef, useState } from "react";
-import { useSession } from "next-auth/react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSession, signIn } from "next-auth/react";
+import { generateBlogContent, generateTags } from "@/lib/gemini"; // Adjust path as needed
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 const JoditEditor = dynamic(() => import("jodit-react"), {
   ssr: false,
 });
 
-export default function AddBlogForm() {
+export default function AddBlogForm({ callbackUrlParams }) {
   const editor = useRef(null);
-  const { data: session } = useSession(); // 👈 Get session info
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState(null);
@@ -18,6 +22,26 @@ export default function AddBlogForm() {
   const [tags, setTags] = useState("");
   const [content, setContent] = useState("");
   const [post, setPost] = useState(false);
+  const [loadingAI, setLoadingAI] = useState(false);
+
+  const callbackUrl =
+    pathname +
+    (callbackUrlParams
+      ? "?" + new URLSearchParams(callbackUrlParams).toString()
+      : "");
+
+  // Auth check
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (!session) {
+      signIn("credentials", {
+        callbackUrl: `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+      });
+    }
+  }, [session, status, callbackUrl]);
+
+  if (!session) return <div>Redirecting to login...</div>;
 
   const config = {
     readonly: false,
@@ -31,10 +55,11 @@ export default function AddBlogForm() {
     try {
       if (!session?.user?.name) {
         alert("You must be logged in to post a blog.");
+        setPost(false);
         return;
       }
 
-      // Upload image
+      // Upload image if selected
       let thumbnailUrl = "";
       if (thumbnail) {
         const formData = new FormData();
@@ -50,7 +75,6 @@ export default function AddBlogForm() {
           );
 
           const data = await res.json();
-          console.log("Image upload response:", data); // 👈 Add this
 
           if (!data.success) {
             throw new Error(data.error?.message || "Image upload failed");
@@ -66,6 +90,7 @@ export default function AddBlogForm() {
           return;
         }
       }
+
       // Construct blog data
       const blogData = {
         title,
@@ -73,13 +98,16 @@ export default function AddBlogForm() {
         author: session.user.name,
         email: session.user.email,
         content,
-        tags: tags.split(",").map((tag) => tag.trim()),
+        tags: tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
         category,
         publishedAt: new Date().toISOString(),
         comments: [],
       };
 
-      await fetch("/api/blog", {
+      const res = await fetch("/api/blog", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +115,11 @@ export default function AddBlogForm() {
         body: JSON.stringify(blogData),
       });
 
-      // Reset
+      if (!res.ok) {
+        throw new Error("Failed to create blog");
+      }
+
+      // Reset form
       setTitle("");
       setThumbnail(null);
       setCategory("");
@@ -96,13 +128,52 @@ export default function AddBlogForm() {
       alert("Blog created successfully!");
     } catch (err) {
       console.error("Error creating blog:", err);
+      alert("Error creating blog, please try again.");
     } finally {
       setPost(false);
     }
   };
 
+  // AI Handlers
+  const handleGenerateBlog = async () => {
+    if (!title) {
+      alert("Please enter a blog topic/title first.");
+      return;
+    }
+    setLoadingAI(true);
+    try {
+      const blog = await generateBlogContent(title);
+      setContent(blog);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate blog content.");
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
+  const handleSuggestTags = async () => {
+    if (!content) {
+      alert("Please write or generate content first.");
+      return;
+    }
+    setLoadingAI(true);
+    try {
+      const suggestedTags = await generateTags(content);
+      setTags(suggestedTags);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to suggest tags.");
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white shadow-md p-6 rounded-lg">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white shadow-md p-6 rounded-lg max-w-3xl mx-auto"
+    >
       <div className="mb-4">
         <label className="block font-semibold mb-2">Blog Title</label>
         <input
@@ -114,8 +185,29 @@ export default function AddBlogForm() {
         />
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="mb-4 flex-1">
+      {/* AI Action Buttons */}
+      <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+        <button
+          type="button"
+          className="btn btn-accent"
+          onClick={handleGenerateBlog}
+          disabled={loadingAI}
+        >
+          {loadingAI ? "Generating..." : "✍️ Generate Blog with AI"}
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-outline"
+          onClick={handleSuggestTags}
+          disabled={loadingAI}
+        >
+          {loadingAI ? "Loading..." : "🏷 Suggest Tags"}
+        </button>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="flex-1">
           <label className="block font-semibold mb-2">Thumbnail Image</label>
           <input
             type="file"
@@ -124,7 +216,8 @@ export default function AddBlogForm() {
             accept="image/*"
           />
         </div>
-        <div className="mb-4 flex-1">
+
+        <div className="flex-1">
           <label className="block font-semibold mb-2">Category</label>
           <select
             className="select select-bordered w-full"
@@ -163,7 +256,7 @@ export default function AddBlogForm() {
         />
       </div>
 
-      <div className="mb-4">
+      <div className="mb-6">
         <label className="block font-semibold mb-2">Blog Content</label>
         <JoditEditor
           ref={editor}
@@ -174,7 +267,11 @@ export default function AddBlogForm() {
         />
       </div>
 
-      <button type="submit" className="btn btn-primary" disabled={post}>
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={post || loadingAI}
+      >
         {post ? "Creating..." : "Create Blog"}
       </button>
     </form>

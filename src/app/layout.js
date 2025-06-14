@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import NextAuthProvider from "@/NextAuthProvider";
 import GeminiWidget from "@/components/GeminiWidget";
+import Footer from "@/components/Footer";
 
 // Load the fonts
 const geistSans = Geist({
@@ -32,7 +33,8 @@ export default function RootLayout({ children }) {
         <NextAuthProvider>
           <Navbar />
           {children}
-          <GeminiWidget />
+          {/* <GeminiWidget /> */}
+          <Footer />
         </NextAuthProvider>
       </body>
     </html>

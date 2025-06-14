@@ -61,7 +61,7 @@ export default function Profile() {
     <div className="max-w-3xl mx-auto p-6">
       <div className="bg-white shadow-xl rounded-2xl p-6">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          👤 Your Profile
+          Your Profile
         </h1>
 
         {!isEditing ? (
@@ -94,7 +94,7 @@ export default function Profile() {
               onClick={() => setIsEditing(true)}
               className="mt-4 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow hover:from-blue-700 hover:to-indigo-700 transition"
             >
-              ✏️ Edit Profile
+              Edit Profile
             </button>
           </div>
         ) : (
@@ -161,14 +161,14 @@ export default function Profile() {
                 type="submit"
                 className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-2 rounded-full shadow hover:from-green-600 hover:to-emerald-600 transition"
               >
-                ✅ Save
+                Save
               </button>
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
                 className="bg-gray-300 text-gray-700 px-6 py-2 rounded-full shadow hover:bg-gray-400 transition"
               >
-                ❌ Cancel
+                Cancel
               </button>
             </div>
           </form>

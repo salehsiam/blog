@@ -1,6 +1,6 @@
 "use client";
 
-import { generateBlogContent } from "@/lib/gemini";
+import { generateBlogContent, generateBlogSummary } from "@/lib/gemini"; // import your summary fn
 import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 
@@ -9,6 +9,7 @@ export default function GeminiWidget() {
   const [topic, setTopic] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingAI, setLoadingAI] = useState(false); // new loading for summarize
 
   const handleGenerate = async () => {
     if (!topic) return;
@@ -16,6 +17,23 @@ export default function GeminiWidget() {
     const result = await generateBlogContent(topic);
     setContent(result);
     setLoading(false);
+  };
+
+  const handleSummarize = async () => {
+    if (!content) {
+      alert("Please write or generate content first.");
+      return;
+    }
+    setLoadingAI(true);
+    try {
+      const summary = await generateBlogSummary(content);
+      alert("Summary:\n\n" + summary);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to generate summary.");
+    } finally {
+      setLoadingAI(false);
+    }
   };
 
   const handleModalOpen = () => setIsModalOpen(!isModalOpen);
@@ -58,7 +76,7 @@ export default function GeminiWidget() {
             )}
           </div>
 
-          {/* Input */}
+          {/* Input and Buttons */}
           <div className="border-t p-3 bg-white flex gap-2">
             <input
               type="text"
@@ -74,6 +92,16 @@ export default function GeminiWidget() {
             >
               {loading ? "Thinking..." : "Generate"}
             </button>
+
+            {/* New Summarize Button */}
+            <button
+              type="button"
+              className="btn btn-secondary px-4 py-2 rounded-md text-sm bg-gray-300 hover:bg-gray-400"
+              onClick={handleSummarize}
+              disabled={loadingAI}
+            >
+              {loadingAI ? "Loading..." : "📄 Summarize"}
+            </button>
           </div>
         </div>
       )}
@@ -84,7 +112,7 @@ export default function GeminiWidget() {
           className="px-6 py-3 bg-white border font-semibold rounded-xl flex items-center gap-2 shadow-md hover:shadow-lg"
           onClick={handleModalOpen}
         >
-          AI
+          Make Summarize
         </button>
       )}
     </div>

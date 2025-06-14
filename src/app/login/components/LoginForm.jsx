@@ -7,7 +7,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
+export default function LoginForm({ callbackUrl }) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -39,11 +39,11 @@ export default function LoginForm() {
       const res = await signIn("credentials", {
         email,
         password,
-        callbackUrl: "/",
+        callbackUrl,
         redirect: false,
       });
       if (res.ok) {
-        router.push("/");
+        router.push(res.url || "/");
       }
     } catch (err) {
       setError("Login failed. Try again.");
